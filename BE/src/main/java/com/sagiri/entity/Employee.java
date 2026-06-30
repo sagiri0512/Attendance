@@ -9,13 +9,12 @@ public class Employee {
 
   private Long id;
   private String empNo;
-  private String username;
   private String password;
   private String realName;
   private Long deptId;
   private Long pmId;
   private Long plId;
-  private Long role;
+  private Byte role;
   private String phone;
   private Double baseSalary;
   private Double positionSalary;
