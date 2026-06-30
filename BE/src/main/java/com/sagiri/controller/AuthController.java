@@ -1,9 +1,24 @@
 package com.sagiri.controller;
 
-import org.springframework.stereotype.Controller;
+import com.sagiri.common.Result;
+import com.sagiri.dto.UserLogin;
+import com.sagiri.service.EmployeeService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private final EmployeeService employeeService;
+
+    public AuthController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
+    @PostMapping("/login")
+    public Result<?> login(@RequestBody UserLogin userLogin){
+        return employeeService.login(userLogin.getEmpNo(), userLogin.getPassword());
+    }
 }
