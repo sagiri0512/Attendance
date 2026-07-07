@@ -17,6 +17,17 @@ request.interceptors.request.use(config => {
 request.interceptors.response.use(
   response => response,
   error => {
+    // 401 → token 无效/过期/已登出，清空并跳转
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      ElMessage.error('登录已失效，请重新登录')
+      // 不在登录页才跳转，防止死循环
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+      return Promise.reject(error)
+    }
+
     const msg = error.response?.data?.message || '请求失败'
     ElMessage.error(msg)
     return Promise.reject(error)
