@@ -4,6 +4,7 @@ import com.sagiri.common.Result;
 import com.sagiri.entity.Employee;
 import com.sagiri.mapper.EmployeeMapper;
 import com.sagiri.service.EmployeeService;
+import com.sagiri.service.TokenListService;
 import com.sagiri.utils.BcryptUtil;
 import com.sagiri.utils.JwtUtil;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,11 @@ import org.springframework.util.StringUtils;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeMapper employeeMapper;
+    private final TokenListService tokenListService;
 
-    public EmployeeServiceImpl(EmployeeMapper employeeMapper) {
+    public EmployeeServiceImpl(EmployeeMapper employeeMapper, TokenListService tokenListService) {
         this.employeeMapper = employeeMapper;
+        this.tokenListService = tokenListService;
     }
 
     @Override
@@ -28,6 +31,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         if(employee == null || !BcryptUtil.matches(password, employee.getPassword())){
             return Result.error(400, "工号或者用户名错误！");
         }
-        return  Result.success(JwtUtil.generateToken(String.valueOf(employee.getId()), String.valueOf(employee.getRole()), employee.getRealName()));
+        String jwtToken = JwtUtil.generateToken(String.valueOf(employee.getId()), String.valueOf(employee.getRole()), employee.getRealName());
+
+        tokenListService.setToken(jwtToken);
+
+        return  Result.success(jwtToken);
     }
 }

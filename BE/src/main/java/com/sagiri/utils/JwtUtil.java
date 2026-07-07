@@ -60,10 +60,17 @@ public class JwtUtil {
     /**
      * 获取姓名
      */
-
-    public static String getRealName(String token){
+    public static String getRealName(String token) {
         return parseToken(token).get("realName", String.class);
     }
+
+    /**
+     * 获取过期时间戳（毫秒），用于 Redis 黑名单 TTL
+     */
+    public static long getExpireTime(String token) {
+        return parseToken(token).getExpiration().getTime();
+    }
+
     /**
      * 校验 Token 是否有效
      */
