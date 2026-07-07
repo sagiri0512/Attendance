@@ -42,8 +42,8 @@ import { useUserStore } from '@/store/user'
 const router = useRouter()
 const userStore = useUserStore()
 
-function handleLogout() {
-  userStore.logout()
+async function handleLogout() {
+  await userStore.logout()
   ElMessage.success('已退出')
   router.push('/login')
 }
