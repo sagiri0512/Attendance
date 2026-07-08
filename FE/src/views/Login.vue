@@ -101,7 +101,7 @@ async function handleLogin() {
       empNo: form.empNo,
       password: form.password
     })
-    userStore.setToken(res.data)
+    userStore.setToken(res.data.data)
     ElMessage.success('登录成功')
     router.push('/')
   } catch {

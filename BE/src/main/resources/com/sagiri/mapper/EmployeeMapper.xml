@@ -4,6 +4,27 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sagiri.mapper.EmployeeMapper">
     <select id="getEmployeeByEmpNo" resultType="com.sagiri.entity.Employee">
-            select id, emp_no, password, real_name, role from employee where emp_no = #{empNo}
+        select id, emp_no, password, real_name, role from employee where emp_no = #{empNo}
+    </select>
+
+    <resultMap id="userInfo" type="com.sagiri.vo.UserInfoVo">
+        <result column="emp_no" property="empNo"/>
+        <result column="role" property="role"/>
+        <result column="real_name" property="username"/>
+        <result column="pl_name" property="PLName"/>
+        <result column="pm_name" property="PMName"/>
+    </resultMap>
+
+    <select id="getEmployeeInfo" resultMap="userInfo">
+        SELECT
+        e.emp_no as emp_no,
+        e.role as role,
+        e.real_name as real_name,
+        pl.real_name AS pl_name,
+        pm.real_name AS pm_name
+        FROM employee e
+        LEFT JOIN employee pl ON e.pl_id = pl.id
+        LEFT JOIN employee pm ON e.pm_id = pm.id
+        WHERE e.id = #{id}
     </select>
 </mapper>

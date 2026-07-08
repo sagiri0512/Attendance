@@ -44,4 +44,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         tokenListService.removeToken(token);
         return Result.success("已登出！");
     }
+
+    @Override
+    public Result<?> getUserInfoByJWT(String header) {
+        String token = header.substring(7);
+        Long id = Long.valueOf(JwtUtil.getUserId(token));
+        return Result.success(employeeMapper.getEmployeeInfo(id));
+    }
 }

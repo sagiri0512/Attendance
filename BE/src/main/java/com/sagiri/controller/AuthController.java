@@ -32,4 +32,10 @@ public class AuthController {
         Result<?> result = employeeService.logout(header);
         return ResponseEntity.status(result.getCode()).body(result);
     }
+    @PostMapping("/current")
+    public ResponseEntity<Result<?>> current(HttpServletRequest req){
+        String header = req.getHeader("Authorization");
+        Result<?> result = employeeService.getUserInfoByJWT(header);
+        return ResponseEntity.status(result.getCode()).body(result);
+    }
 }
