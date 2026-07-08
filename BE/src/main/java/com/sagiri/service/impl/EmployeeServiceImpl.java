@@ -37,4 +37,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return  Result.success(jwtToken);
     }
+
+    @Override
+    public Result<?> logout(String header) {
+        String token = header.substring(7);
+        tokenListService.removeToken(token);
+        return Result.success("已登出！");
+    }
 }

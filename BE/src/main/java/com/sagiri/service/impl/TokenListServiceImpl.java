@@ -27,4 +27,9 @@ public class TokenListServiceImpl implements TokenListService {
     public Boolean isTokenList(String token) {
         return redisTemplate.hasKey("tokenList:" + token);
     }
+
+    @Override
+    public void removeToken(String token) {
+        redisTemplate.delete("tokenList:" + token);
+    }
 }

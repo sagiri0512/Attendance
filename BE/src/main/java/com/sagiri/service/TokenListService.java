@@ -4,4 +4,6 @@ public interface TokenListService {
     public void setToken(String token);
 
     public Boolean isTokenList(String token);
+
+    public void removeToken(String token);
 }
