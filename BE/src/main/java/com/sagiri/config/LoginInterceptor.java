@@ -40,9 +40,6 @@ public class LoginInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        request.setAttribute("userId", JwtUtil.getUserId(token));
-        request.setAttribute("role", JwtUtil.getRole(token));
-        request.setAttribute("realName", JwtUtil.getRealName(token));
         return true;
     }
 
