@@ -102,6 +102,7 @@ async function handleLogin() {
       password: form.password
     })
     userStore.setToken(res.data.data)
+    await userStore.fetchUser()
     ElMessage.success('登录成功')
     router.push('/')
   } catch {
