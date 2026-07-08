@@ -3,5 +3,18 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sagiri.mapper.AttendanceRecordMapper">
-
+    <select id="findTodayRecordId" resultType="java.lang.Long">
+        SELECT id FROM attendance_record
+        WHERE emp_id = #{empId}
+        AND DATE(clock_in_time) = CURDATE()
+    </select>
+    <insert id="insert">
+        INSERT INTO attendance_record(emp_id, record_date, clock_in_time, clock_out_time, created_at)
+        VALUES (#{empId}, CURDATE(), NOW(), NOW(), NOW())
+    </insert>
+    <update id="updateClockOut">
+        UPDATE attendance_record
+        SET clock_out_time = NOW(), updated_at = NOW()
+        WHERE id = #{id}
+    </update>
 </mapper>
