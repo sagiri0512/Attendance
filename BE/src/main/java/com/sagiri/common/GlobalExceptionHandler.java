@@ -2,6 +2,8 @@ package com.sagiri.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -42,6 +44,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Result<?>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
         return ResponseEntity.status(405).body(Result.error(405, "请求方法不支持"));
+    }
+
+    //工号或密码错误
+    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
+    public ResponseEntity<Result<?>> userNameNotFound(){
+        return ResponseEntity.status(401).body(Result.error(401, "工号或密码错误！"));
     }
 
     // 兜底：未知异常

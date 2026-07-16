@@ -17,20 +17,22 @@ request.interceptors.request.use(config => {
 request.interceptors.response.use(
   response => response,
   error => {
-    // 401 → token 无效/过期/已登出，清空并跳转
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      ElMessage.error('登录已失效，请重新登录')
-      // 不在登录页才跳转，防止死循环
+    const status = error.response?.status;
+    const msg = error.response?.data?.message || '请求失败';
+
+    // 非登录接口的 403 → 清 token 跳登录
+    if (status === 403) {
+      localStorage.removeItem('token');
+      ElMessage.error('登录已失效，请重新登录');
       if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
+        window.location.href = '/login';
       }
-      return Promise.reject(error)
+      return Promise.reject(error);
     }
 
-    const msg = error.response?.data?.message || '请求失败'
-    ElMessage.error(msg)
-    return Promise.reject(error)
+    // 全局：显示后端 msg
+    ElMessage.error(msg);
+    return Promise.reject(error);
   }
 )
 
