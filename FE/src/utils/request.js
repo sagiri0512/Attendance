@@ -20,12 +20,14 @@ request.interceptors.response.use(
     const status = error.response?.status;
     const msg = error.response?.data?.message || '请求失败';
 
-    // 非登录接口的 403 → 清 token 跳登录
-    if (status === 403) {
+    // 非登录接口的 401 → 清 token 跳登录
+    if (status === 401) {
       localStorage.removeItem('token');
-      ElMessage.error('登录已失效，请重新登录');
+      ElMessage.error(msg);
       if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
       }
       return Promise.reject(error);
     }

@@ -1,25 +1,16 @@
 package com.sagiri.service.impl;
 
-import com.sagiri.common.Result;
-import com.sagiri.entity.Employee;
+import com.sagiri.vo.Result;
 import com.sagiri.entity.LoginUser;
 import com.sagiri.mapper.EmployeeMapper;
 import com.sagiri.service.EmployeeService;
 import com.sagiri.service.TokenListService;
-import com.sagiri.utils.BcryptUtil;
 import com.sagiri.utils.JwtUtil;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.util.Objects;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {

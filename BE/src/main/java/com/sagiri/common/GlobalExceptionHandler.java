@@ -1,8 +1,11 @@
 package com.sagiri.common;
 
+import com.sagiri.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -48,8 +51,14 @@ public class GlobalExceptionHandler {
 
     //工号或密码错误
     @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
-    public ResponseEntity<Result<?>> userNameNotFound(){
+    public ResponseEntity<Result<?>> handleLoginFailure(){
         return ResponseEntity.status(401).body(Result.error(401, "工号或密码错误！"));
+    }
+
+    // @PreAuthorize 权限不足（Spring Security 6 抛 AuthorizationDeniedException）
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Result<?>> handleAuthorizationDenied(){
+        return ResponseEntity.status(403).body(Result.error(403, "权限不足！"));
     }
 
     // 兜底：未知异常

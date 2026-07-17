@@ -1,4 +1,4 @@
-package com.sagiri.common;
+package com.sagiri.vo;
 
 import lombok.Data;
 
