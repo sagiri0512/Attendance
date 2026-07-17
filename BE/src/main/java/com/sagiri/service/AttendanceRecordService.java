@@ -1,6 +1,6 @@
 package com.sagiri.service;
 
-import com.sagiri.common.Result;
+import com.sagiri.vo.Result;
 
 public interface AttendanceRecordService {
     public Result<?> clock(String header);

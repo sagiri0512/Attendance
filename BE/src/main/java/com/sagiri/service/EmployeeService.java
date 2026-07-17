@@ -1,6 +1,6 @@
 package com.sagiri.service;
 
-import com.sagiri.common.Result;
+import com.sagiri.vo.Result;
 
 public interface EmployeeService {
     public Result<?> login(String empNo, String password);

@@ -58,8 +58,7 @@ async function handleClock() {
     resultMsg.value = res.data.data || '打卡成功'
     resultSuccess.value = true
   } catch {
-    resultMsg.value = '打卡失败，请重试'
-    resultSuccess.value = false
+    // 错误信息已在 request.js 拦截器中处理
   } finally {
     isClocking.value = false
     setTimeout(() => { resultMsg.value = '' }, 3000)

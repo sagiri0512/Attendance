@@ -1,11 +1,12 @@
 package com.sagiri.controller;
 
-import com.sagiri.common.Result;
+import com.sagiri.vo.Result;
 import com.sagiri.dto.UserLogin;
 import com.sagiri.service.EmployeeService;
 import com.sagiri.service.TokenListService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,7 +30,9 @@ public class AuthController {
         Result<?> result = employeeService.logout(header);
         return ResponseEntity.status(result.getCode()).body(result);
     }
+
     @GetMapping("/current")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Result<?>> current(HttpServletRequest req){
         String header = req.getHeader("Authorization");
         Result<?> result = employeeService.getUserInfoByJWT(header);

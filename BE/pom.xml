@@ -118,10 +118,19 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+
         <!-- security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- fastjson2 -->
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>2.0.62</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

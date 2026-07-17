@@ -1,6 +1,6 @@
 package com.sagiri.service.impl;
 
-import com.sagiri.common.Result;
+import com.sagiri.vo.Result;
 import com.sagiri.mapper.AttendanceRecordMapper;
 import com.sagiri.service.AttendanceRecordService;
 import com.sagiri.utils.JwtUtil;
