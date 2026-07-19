@@ -27,4 +27,47 @@
         LEFT JOIN employee pm ON e.pm_id = pm.id
         WHERE e.id = #{id}
     </select>
+
+    <insert id="insertEmployee" parameterType="com.sagiri.entity.Employee"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO employee (
+        emp_no, password, real_name, pm_id, pl_id,
+        role, phone, base_salary, position_salary,
+        housing_subsidy, car_subsidy, meal_subsidy, other_subsidy,
+        social_insurance_base, housing_fund_base,
+        housing_fund_ratio_personal, housing_fund_ratio_company,
+        status, created_at, deleted
+        ) VALUES (
+        #{empNo}, #{password}, #{realName}, #{pmId}, #{plId},
+        #{role}, #{phone}, #{baseSalary}, #{positionSalary},
+        #{housingSubsidy}, #{carSubsidy}, #{mealSubsidy}, #{otherSubsidy},
+        #{socialInsuranceBase}, #{housingFundBase},
+        #{housingFundRatioPersonal}, #{housingFundRatioCompany},
+        1, NOW(), 0
+        )
+    </insert>
+
+    <update id="updateEmpNoById">
+        UPDATE employee
+        SET emp_no = #{empNo}
+        WHERE id = #{id}
+    </update>
+
+    <resultMap id="allPM" type="com.sagiri.vo.PM">
+        <id column="id" property="id"/>
+        <result column="pm_name" property="PMName"/>
+    </resultMap>
+
+    <select id="getAllPM" resultMap="allPM">
+        SELECT id, real_name as pm_name FROM employee WHERE role = 2
+    </select>
+
+    <resultMap id="PLByPMId" type="com.sagiri.vo.PL">
+        <id column="id" property="id"/>
+        <result column="pl_name" property="PLName"/>
+    </resultMap>
+
+    <select id="getPLByPMId" resultMap="PLByPMId">
+        SELECT id, real_name as pl_name FROM employee WHERE role = 1 AND pm_id = #{pmId}
+    </select>
 </mapper>
