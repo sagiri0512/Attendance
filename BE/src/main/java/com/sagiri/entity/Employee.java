@@ -11,7 +11,6 @@ public class Employee {
   private String empNo;
   private String password;
   private String realName;
-  private Long deptId;
   private Long pmId;
   private Long plId;
   private Byte role;
