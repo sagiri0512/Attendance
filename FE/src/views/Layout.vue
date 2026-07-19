@@ -30,15 +30,36 @@
 
       <!-- 2 区域：菜单 -->
       <nav class="menu">
-        <router-link
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          :class="['menu-item', { active: isActive(item.path) }]"
-        >
-          <span class="menu-icon">{{ item.icon }}</span>
-          <span class="menu-text">{{ item.label }}</span>
-        </router-link>
+        <template v-for="item in menuItems" :key="item.path || item.label">
+          <!-- 普通菜单 -->
+          <router-link
+            v-if="!item.children"
+            :to="item.path"
+            :class="['menu-item', { active: isActive(item.path) }]"
+          >
+            <span class="menu-icon">{{ item.icon }}</span>
+            <span class="menu-text">{{ item.label }}</span>
+          </router-link>
+
+          <!-- 带子菜单的菜单 -->
+          <div v-else class="submenu" :class="{ active: isGroupActive(item) }">
+            <div class="menu-item submenu-title">
+              <span class="menu-icon">{{ item.icon }}</span>
+              <span class="menu-text">{{ item.label }}</span>
+            </div>
+            <div class="submenu-list">
+              <router-link
+                v-for="sub in item.children"
+                :key="sub.path"
+                :to="sub.path"
+                :class="['submenu-item', { active: route.path === sub.path }]"
+              >
+                <span class="submenu-dot"></span>
+                <span class="menu-text">{{ sub.label }}</span>
+              </router-link>
+            </div>
+          </div>
+        </template>
       </nav>
     </aside>
 
@@ -75,19 +96,38 @@ const allMenu = [
   { path: '/my-record', label: '我的记录', icon: '📋' },
   { path: '/leave/apply', label: '请假申请', icon: '📝' },
   { path: '/leave/approve', label: '审批管理', icon: '✅', roles: [1, 2, 3, 4] },
+  {
+    label: '员工管理',
+    icon: '👥',
+    roles: [3],
+    children: [
+      { path: '/employee/add', label: '添加员工' },
+      { path: '/employee/list', label: '员工一览' }
+    ]
+  },
   { path: '/stat', label: '统计报表', icon: '📊', roles: [3, 4] }
 ]
 
 const menuItems = computed(() => {
-  const role = userStore.user?.role
+  // 优先用 user.role（接口返回），否则从 JWT 解析（登录后立即可用）
+  const role = userStore.user?.role != null ? Number(userStore.user.role) : userStore.role
   return allMenu.filter(item => {
     if (!item.roles) return true
     return item.roles.includes(role)
+  }).map(item => {
+    if (!item.children) return item
+    // 父级菜单的 roles 已经过滤过，子菜单无需再过滤
+    return item
   })
 })
 
 function isActive(path) {
   return route.path === path || route.path.startsWith(path + '/')
+}
+
+function isGroupActive(item) {
+  if (!item.children) return false
+  return item.children.some(sub => route.path === sub.path || route.path.startsWith(sub.path + '/'))
 }
 
 async function handleLogout() {
@@ -159,7 +199,8 @@ async function handleLogout() {
   overflow-y: auto;
 }
 
-.menu-item {
+.menu-item,
+.submenu-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -171,11 +212,13 @@ async function handleLogout() {
   transition: all 0.2s;
   cursor: pointer;
 }
-.menu-item:hover {
+.menu-item:hover,
+.submenu-item:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
 }
-.menu-item.active {
+.menu-item.active,
+.submenu-item.active {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
 }
@@ -187,6 +230,36 @@ async function handleLogout() {
 }
 .menu-text {
   font-size: 14px;
+}
+
+.submenu {
+  margin-bottom: 4px;
+}
+.submenu-title {
+  margin-bottom: 0;
+  cursor: default;
+}
+.submenu-list {
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.submenu-item {
+  padding: 10px 16px;
+  margin-bottom: 2px;
+  color: #94a3b8;
+}
+.submenu-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+.submenu-item.active .submenu-dot {
+  opacity: 1;
 }
 
 .main {

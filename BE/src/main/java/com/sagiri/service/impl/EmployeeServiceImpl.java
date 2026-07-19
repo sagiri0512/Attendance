@@ -69,14 +69,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // ========== 1. 基础非空校验 ==========
         if (employee.getRealName() == null || employee.getRealName().trim().isEmpty()) {
-            return Result.error(401, "姓名不能为空");
+            return Result.error(400, "姓名不能为空");
         }
         if (employee.getRole() == null) {
-            return Result.error(401, "角色不能为空");
+            return Result.error(400, "角色不能为空");
         }
         Byte role = employee.getRole();
         if (role < 0 || role > 3) {
-            return Result.error(401, "角色值非法（0PG/1PL/2PM/3HR）");
+            return Result.error(400, "角色值非法（0PG/1PL/2PM/3HR）");
         }
 
         // ========== 2. 薪资非负校验 ==========
@@ -86,7 +86,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 || isNegative(employee.getCarSubsidy())
                 || isNegative(employee.getMealSubsidy())
                 || isNegative(employee.getOtherSubsidy())) {
-            return Result.error(401, "薪资/补贴不能为负数");
+            return Result.error(400, "薪资/补贴不能为负数");
         }
 
         // ========== 3. 角色与上级关系校验 ==========
@@ -98,7 +98,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // ========== 4. 手机号格式校验 ==========
         if (employee.getPhone() != null && !employee.getPhone().trim().isEmpty()) {
             if (!employee.getPhone().matches("^1[3-9]\\d{9}$")) {
-                return Result.error(401, "手机号格式不正确");
+                return Result.error(400, "手机号格式不正确");
             }
         }
 
@@ -125,11 +125,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Result<?> getPLByPMId(Long pmId) {
         if(pmId == null){
-            return Result.error(401, "请选择PM！");
+            return Result.error(400, "请选择PM！");
         }
         List<PL> plList = employeeMapper.getPLByPMId(pmId);
         if(plList.isEmpty()){
-            return Result.error(401, "该PM下不存在PL，请先设置PL！");
+            return Result.error(400, "该PM下不存在PL，请先设置PL！");
         }
         return Result.success(plList);
     }
@@ -143,18 +143,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     private Result<?> validateRoleAndSuperior(Byte role, Long pmId, Long plId) {
         if (role == 0) {
             if (pmId == null || plId == null) {
-                return Result.error(401, "PG必须设置PL和PM");
+                return Result.error(400, "PG必须设置PL和PM");
             }
         } else if (role == 1) {
             if (pmId == null) {
-                return Result.error(401, "PL必须设置PM");
+                return Result.error(400, "PL必须设置PM");
             }
             if (plId != null) {
-                return Result.error(401, "PL不能设置PL上级");
+                return Result.error(400, "PL不能设置PL上级");
             }
         } else if (role == 2 || role == 3) {
             if (pmId != null || plId != null) {
-                return Result.error(401, "PM/HR不能设置上级");
+                return Result.error(400, "PM/HR不能设置上级");
             }
         }
         return null;  // 校验通过

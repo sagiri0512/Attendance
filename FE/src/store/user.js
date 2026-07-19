@@ -1,10 +1,22 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { logout as logoutApi, getCurrentUser } from '@/api/auth'
+import { getRoleFromToken, getRealNameFromToken } from '@/utils/jwt'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
   const user = ref(null)
+
+  // 登录后立即从 JWT 解析 role，无需等 fetchUser 返回
+  // role 用于菜单显示、路由守卫、按钮权限判断
+  const role = computed(() => {
+    if (user.value?.role != null) return Number(user.value.role)
+    return getRoleFromToken(token.value)
+  })
+  const realName = computed(() => user.value?.realName || getRealNameFromToken(token.value) || '')
+
+  // 常用权限判断
+  const isHr = computed(() => role.value === 3)
 
   function setToken(val) {
     token.value = val
@@ -35,5 +47,8 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token')
   }
 
-  return { token, user, setToken, setUser, fetchUser, logout }
+  return {
+    token, user, role, realName, isHr,
+    setToken, setUser, fetchUser, logout
+  }
 })
