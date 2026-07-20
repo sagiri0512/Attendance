@@ -29,7 +29,7 @@ public class EmployeeController {
         return ResponseEntity.status(result.getCode()).body(result);
     }
 
-    @GetMapping("pl-list")
+    @GetMapping("/pl-list")
     public ResponseEntity<Result<?>> getPLByPMId(@RequestParam("pmId") Long pmId){
         Result<?> result = employeeService.getPLByPMId(pmId);
         return ResponseEntity.status(result.getCode()).body(result);

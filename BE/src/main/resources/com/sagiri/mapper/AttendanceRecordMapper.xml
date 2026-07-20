@@ -17,4 +17,48 @@
         SET clock_out_time = NOW(), updated_at = NOW()
         WHERE id = #{id}
     </update>
+
+    <resultMap id="attendanceVOResult" type="com.sagiri.vo.AttendanceVO">
+        <!-- attendance_record -->
+        <id     column="a_id"           property="aId"          />
+        <result column="a_date"         property="aDate"        jdbcType="DATE"       />
+        <result column="a_clock_in"     property="aClockIn"     jdbcType="TIMESTAMP"  />
+        <result column="a_clock_out"    property="aClockOut"    jdbcType="TIMESTAMP"  />
+        <result column="a_status"       property="aStatus"      jdbcType="TINYINT"    />
+        <result column="a_absent_hours" property="aAbsentHours" jdbcType="DECIMAL"    />
+        <result column="a_leave_id"     property="aLeaveId"     jdbcType="BIGINT"     />
+
+        <!-- leave_request (LEFT JOIN, 可能为null) -->
+        <result column="l_type"   property="lType"   jdbcType="TINYINT"    />
+        <result column="l_start"  property="lStart"  jdbcType="TIMESTAMP"  />
+        <result column="l_end"    property="lEnd"    jdbcType="TIMESTAMP"  />
+        <result column="l_days"   property="lDays"   jdbcType="DECIMAL"    />
+        <result column="l_reason" property="lReason" jdbcType="VARCHAR"    />
+        <result column="l_final"  property="lFinal"  jdbcType="TINYINT"    />
+    </resultMap>
+
+    <select id="selectAttendanceWithLeave" resultMap="attendanceVOResult">
+        SELECT
+        a.id            AS a_id,
+        a.record_date   AS a_date,
+        a.clock_in_time AS a_clock_in,
+        a.clock_out_time AS a_clock_out,
+        a.status        AS a_status,
+        a.absent_hours  AS a_absent_hours,
+        a.leave_request_id AS a_leave_id,
+
+        l.leave_type    AS l_type,
+        l.start_time    AS l_start,
+        l.end_time      AS l_end,
+        l.days          AS l_days,
+        l.reason        AS l_reason,
+        l.final_status  AS l_final
+        FROM attendance_record a
+        LEFT JOIN leave_request l
+        ON a.leave_request_id = l.id
+        AND l.final_status IN (0, 1)
+        WHERE a.emp_id = #{eid}
+        ORDER BY a.record_date DESC
+    </select>
+
 </mapper>
