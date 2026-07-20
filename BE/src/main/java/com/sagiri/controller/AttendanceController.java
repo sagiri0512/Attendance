@@ -5,9 +5,7 @@ import com.sagiri.service.AttendanceRecordService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/attendance")
@@ -23,6 +21,12 @@ public class AttendanceController {
     public ResponseEntity<Result<?>> clock(HttpServletRequest req){
         String header = req.getHeader("Authorization");
         Result<?> result = attendanceRecordService.clock(header);
+        return ResponseEntity.status(result.getCode()).body(result);
+    }
+
+    @GetMapping("/my/{eid}")
+    public ResponseEntity<Result<?>> getMyAttendanceRecords(@PathVariable Long eid, @RequestParam("start") Integer start, @RequestParam("size") Integer size){
+        Result<?> result = attendanceRecordService.getMyAttendanceRecords(eid, start, size);
         return ResponseEntity.status(result.getCode()).body(result);
     }
 }
