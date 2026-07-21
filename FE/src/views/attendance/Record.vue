@@ -26,7 +26,7 @@
 
         <el-table-column label="下班打卡" width="140">
           <template #default="{ row }">
-            <span v-if="row.aclockOut">{{ formatTime(row.aclockOut) }}</span>
+            <span v-if="row.aclockOut">{{ formatTime(row.aclockOut, row.adate) }}</span>
             <span v-else class="null-text">--</span>
           </template>
         </el-table-column>
@@ -110,12 +110,21 @@ function formatDate(str) {
 }
 
 // 格式化时间 2026-07-20T08:55:00 → 08:55
-function formatTime(str) {
+// 如果时间跨天（00:00~05:00 且日期 != record_date），显示"次日 HH:mm"
+function formatTime(str, recordDate) {
   if (!str) return '--'
   const d = new Date(str)
-  const h = String(d.getHours()).padStart(2, '0')
+  const h = d.getHours()
   const m = String(d.getMinutes()).padStart(2, '0')
-  return `${h}:${m}`
+  const hh = String(h).padStart(2, '0')
+  // 跨天判断：凌晨 0~4 点 且 时间日期和 record_date 不是同一天
+  if (h < 5 && recordDate) {
+    const rd = new Date(recordDate)
+    if (d.toDateString() !== rd.toDateString()) {
+      return `次日 ${hh}:${m}`
+    }
+  }
+  return `${hh}:${m}`
 }
 
 // 状态显示文字

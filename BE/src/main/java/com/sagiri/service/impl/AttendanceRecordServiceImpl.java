@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -27,7 +28,17 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     public Result<?> clock(String header) {
         String token = header.substring(7);
         Long empId = Long.valueOf(JwtUtil.getUserId(token));
+
+        //获取今天的日期
         LocalDate today = LocalDate.now();
+
+        //判断是否是凌晨5点之后打卡
+        boolean after5 = LocalTime.now().getHour() >= 5;
+
+        //凌晨5点之前打卡
+        if(!after5){
+            today = today.minusDays(1);
+        }
 
         Long todayRecordId = attendanceRecordMapper.findRecordByDate(empId, today);
         if (todayRecordId == null) {
