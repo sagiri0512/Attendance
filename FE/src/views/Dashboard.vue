@@ -6,19 +6,19 @@
     </el-card>
 
     <el-row :gutter="20" class="quick-actions">
-      <el-col :span="8">
+      <el-col :xs="24" :sm="8">
         <el-card shadow="hover" class="action-card" @click="$router.push('/clock')">
           <h3>打卡</h3>
           <p>上下班打卡</p>
         </el-card>
       </el-col>
-      <el-col :span="8">
+      <el-col :xs="24" :sm="8">
         <el-card shadow="hover" class="action-card" @click="$router.push('/my-record')">
           <h3>我的记录</h3>
           <p>查看考勤记录</p>
         </el-card>
       </el-col>
-      <el-col :span="8">
+      <el-col :xs="24" :sm="8">
         <el-card shadow="hover" class="action-card" @click="$router.push('/leave/apply')">
           <h3>请假</h3>
           <p>提交请假申请</p>
@@ -76,5 +76,14 @@ const today = computed(() => {
   margin: 0;
   color: #909399;
   font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .welcome-card h2 {
+    font-size: 18px;
+  }
+  .action-card {
+    margin-bottom: 12px;
+  }
 }
 </style>

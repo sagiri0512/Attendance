@@ -12,12 +12,12 @@
       <!-- 基本信息 -->
       <h3 class="section-title">基本信息</h3>
       <el-row :gutter="20">
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="姓名" prop="realName">
             <el-input v-model="form.realName" placeholder="请输入姓名" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="角色" prop="role">
             <el-select v-model="form.role" placeholder="请选择角色" @change="onRoleChange" style="width:100%">
               <el-option :value="0" label="员工 (PG)" />
@@ -27,7 +27,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="手机号" prop="phone">
             <el-input v-model="form.phone" placeholder="11 位手机号" maxlength="11" />
           </el-form-item>
@@ -37,7 +37,7 @@
       <!-- 上级关系（动态显示） -->
       <h3 class="section-title">上级关系</h3>
       <el-row :gutter="20" v-if="needPm">
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="所属 PM" prop="pmId">
             <el-select
               v-model="form.pmId"
@@ -56,7 +56,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8" v-if="needPl">
+        <el-col :xs="24" :sm="12" :md="8" v-if="needPl">
           <el-form-item label="所属 PL" prop="plId">
             <el-select
               v-model="form.plId"
@@ -81,32 +81,32 @@
       <!-- 薪资组成 -->
       <h3 class="section-title">薪资组成</h3>
       <el-row :gutter="20">
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="基本工资" prop="baseSalary">
             <el-input-number v-model="form.baseSalary" :min="0" :precision="2" controls-position="right" style="width:100%" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="岗位工资" prop="positionSalary">
             <el-input-number v-model="form.positionSalary" :min="0" :precision="2" controls-position="right" style="width:100%" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="住房补贴">
             <el-input-number v-model="form.housingSubsidy" :min="0" :precision="2" controls-position="right" style="width:100%" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="交通补贴">
             <el-input-number v-model="form.carSubsidy" :min="0" :precision="2" controls-position="right" style="width:100%" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="餐补">
             <el-input-number v-model="form.mealSubsidy" :min="0" :precision="2" controls-position="right" style="width:100%" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="其他补贴">
             <el-input-number v-model="form.otherSubsidy" :min="0" :precision="2" controls-position="right" style="width:100%" />
           </el-form-item>
@@ -119,22 +119,22 @@
         基数留空或填 0 → 系统自动使用「基本工资」；公积金比例留空 → 系统自动使用 8%
       </p>
       <el-row :gutter="20">
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="社保基数">
             <el-input-number v-model="form.socialInsuranceBase" :min="0" :precision="2" controls-position="right" style="width:100%" placeholder="留空用基本工资" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="公积金基数">
             <el-input-number v-model="form.housingFundBase" :min="0" :precision="2" controls-position="right" style="width:100%" placeholder="留空用基本工资" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="公积金个人比例(%)">
             <el-input-number v-model="form.housingFundRatioPersonal" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="留空用 8%" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="公积金公司比例(%)">
             <el-input-number v-model="form.housingFundRatioCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="留空用 8%" />
           </el-form-item>
@@ -309,5 +309,20 @@ function handleReset() {
 
 .emp-form :deep(.el-input-number) {
   width: 100%;
+}
+
+/* 移动端表单适配 */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  .emp-form {
+    --el-form-label-width: 90px;
+  }
+  .section-title {
+    margin: 16px 0 12px;
+    font-size: 14px;
+  }
 }
 </style>

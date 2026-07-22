@@ -210,6 +210,17 @@ onMounted(fetchData)
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
+/* 移动端表格横滚 */
+@media (max-width: 768px) {
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-wrapper :deep(.el-table) {
+    min-width: 830px;
+  }
+}
+
 /* 日期列 */
 .date-cell {
   font-weight: 600;
@@ -276,5 +287,17 @@ onMounted(fetchData)
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .pagination-wrapper {
+    justify-content: center;
+    margin-top: 12px;
+  }
+  .pagination-wrapper :deep(.el-pagination) {
+    --el-pagination-font-size: 12px;
+    --el-pagination-button-width: 28px;
+    --el-pagination-button-height: 28px;
+  }
 }
 </style>

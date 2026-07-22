@@ -146,6 +146,14 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.4.3</version>  <!-- ← 加上 version -->
+                <executions>                                  <!-- ← 新增 -->
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>                                 <!-- ← 新增 -->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -174,5 +182,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

@@ -1,7 +1,21 @@
 <template>
   <div class="layout">
+    <!-- 移动端汉堡按钮 -->
+    <button class="burger-btn" @click="sidebarOpen = !sidebarOpen">
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+    </button>
+
+    <!-- 移动端遮罩 -->
+    <div
+      class="sidebar-overlay"
+      :class="{ show: sidebarOpen }"
+      @click="sidebarOpen = false"
+    ></div>
+
     <!-- 左侧栏 -->
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ open: sidebarOpen }">
       <!-- 1 区域：用户信息 -->
       <div class="user-card">
         <div class="user-info">
@@ -31,17 +45,16 @@
       <!-- 2 区域：菜单 -->
       <nav class="menu">
         <template v-for="item in menuItems" :key="item.path || item.label">
-          <!-- 普通菜单 -->
           <router-link
             v-if="!item.children"
             :to="item.path"
             :class="['menu-item', { active: isActive(item.path) }]"
+            @click="closeSidebar"
           >
             <span class="menu-icon">{{ item.icon }}</span>
             <span class="menu-text">{{ item.label }}</span>
           </router-link>
 
-          <!-- 带子菜单的菜单 -->
           <div v-else class="submenu" :class="{ active: isGroupActive(item) }">
             <div class="menu-item submenu-title">
               <span class="menu-icon">{{ item.icon }}</span>
@@ -53,6 +66,7 @@
                 :key="sub.path"
                 :to="sub.path"
                 :class="['submenu-item', { active: route.path === sub.path }]"
+                @click="closeSidebar"
               >
                 <span class="submenu-dot"></span>
                 <span class="menu-text">{{ sub.label }}</span>
@@ -71,7 +85,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
@@ -79,6 +93,12 @@ import { useUserStore } from '@/store/user'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+
+const sidebarOpen = ref(false)
+
+function closeSidebar() {
+  sidebarOpen.value = false
+}
 
 const roleMap = {
   0: '员工 (PG)',
@@ -109,14 +129,12 @@ const allMenu = [
 ]
 
 const menuItems = computed(() => {
-  // 优先用 user.role（接口返回），否则从 JWT 解析（登录后立即可用）
   const role = userStore.user?.role != null ? Number(userStore.user.role) : userStore.role
   return allMenu.filter(item => {
     if (!item.roles) return true
     return item.roles.includes(role)
   }).map(item => {
     if (!item.children) return item
-    // 父级菜单的 roles 已经过滤过，子菜单无需再过滤
     return item
   })
 })
@@ -142,8 +160,55 @@ async function handleLogout() {
   display: flex;
   min-height: 100vh;
   background: #f0f2f5;
+  position: relative;
 }
 
+/* ── 移动端汉堡按钮 ── */
+.burger-btn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1100;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.burger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  transition: all 0.2s;
+}
+
+/* ── 移动端遮罩 ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.sidebar-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── 左侧栏 ── */
 .sidebar {
   width: 240px;
   background: #1a1a2e;
@@ -151,6 +216,7 @@ async function handleLogout() {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: transform 0.25s ease;
 }
 
 .user-card {
@@ -266,5 +332,38 @@ async function handleLogout() {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+}
+
+/* ── 移动端适配 ── */
+@media (max-width: 768px) {
+  .burger-btn {
+    display: flex;
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main {
+    padding: 60px 12px 16px;
+  }
+}
+
+/* ── 平板端适配 ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main {
+    padding: 20px 16px;
+  }
 }
 </style>
