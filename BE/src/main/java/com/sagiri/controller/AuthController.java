@@ -25,6 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Result<?>> logout(HttpServletRequest req){
         String header = req.getHeader("Authorization");
         Result<?> result = employeeService.logout(header);
