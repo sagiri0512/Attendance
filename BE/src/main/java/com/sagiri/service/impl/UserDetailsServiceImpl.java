@@ -23,6 +23,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if(employee == null){
             throw new UsernameNotFoundException("账号密码错误！");
         }
-        return new LoginUser();
+        return new LoginUser(employee);
     }
 }
