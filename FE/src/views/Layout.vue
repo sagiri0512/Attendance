@@ -126,6 +126,7 @@ const allMenu = [
     ]
   },
   { path: '/stat', label: '统计报表', icon: '📊', roles: [3] },
+  { path: '/work-calendar', label: '工作日历', icon: '🗓️', roles: [0, 1, 2, 3, 4] },
   { path: '/holiday', label: '节假日管理', icon: '📅', roles: [4] }
 ]
 
