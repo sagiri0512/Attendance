@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/attendance")
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("hasAnyAuthority('0','1','2','3')")
 public class AttendanceController {
     private final AttendanceRecordService attendanceRecordService;
 

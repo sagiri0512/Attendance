@@ -112,10 +112,10 @@ const userName = computed(() => userStore.user?.username || '未知用户')
 const roleLabel = computed(() => roleMap[userStore.user?.role] || '未知角色')
 
 const allMenu = [
-  { path: '/clock', label: '打卡', icon: '⏰' },
-  { path: '/my-record', label: '我的记录', icon: '📋' },
-  { path: '/leave/apply', label: '请假申请', icon: '📝' },
-  { path: '/leave/approve', label: '审批管理', icon: '✅', roles: [1, 2, 3, 4] },
+  { path: '/clock', label: '打卡', icon: '⏰', roles: [0, 1, 2, 3] },
+  { path: '/my-record', label: '我的记录', icon: '📋', roles: [0, 1, 2, 3] },
+  { path: '/leave/apply', label: '请假申请', icon: '📝', roles: [0, 1, 2, 3] },
+  { path: '/leave/approve', label: '审批管理', icon: '✅', roles: [1, 2, 3] },
   {
     label: '员工管理',
     icon: '👥',
@@ -125,7 +125,8 @@ const allMenu = [
       { path: '/employee/list', label: '员工一览' }
     ]
   },
-  { path: '/stat', label: '统计报表', icon: '📊', roles: [3, 4] }
+  { path: '/stat', label: '统计报表', icon: '📊', roles: [3] },
+  { path: '/holiday', label: '节假日管理', icon: '📅', roles: [4] }
 ]
 
 const menuItems = computed(() => {
@@ -158,7 +159,7 @@ async function handleLogout() {
 <style scoped>
 .layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: #f0f2f5;
   position: relative;
 }
@@ -332,6 +333,7 @@ async function handleLogout() {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+  min-height: 0;
 }
 
 /* ── 移动端适配 ── */

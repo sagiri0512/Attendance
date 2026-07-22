@@ -53,6 +53,12 @@ const routes = [
         meta: { title: '统计报表', roles: [3, 4] }
       },
       {
+        path: 'holiday',
+        name: 'HolidayCalendar',
+        component: () => import('@/views/holiday/Calendar.vue'),
+        meta: { title: '节假日管理', roles: [4] }
+      },
+      {
         path: 'employee',
         name: 'Employee',
         component: () => import('@/views/employee/Index.vue'),
