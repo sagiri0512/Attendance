@@ -153,7 +153,7 @@
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import { getYearHoliday } from '@/api/holiday'
+import { getYearHoliday, submitHolidayConfig } from '@/api/holiday'
 import { useHolidayStore } from '@/stores/holiday'
 
 /* ── Store ── */
@@ -443,23 +443,16 @@ async function submitToBackend() {
   }
   submitting.value = true
   try {
-    // TODO: 替换为实际后端 API
-    // const res = await import('@/api/holiday').then(m => m.submitHolidayConfig(payload))
-    console.log('提交到后端的 payload:', payload)
-    ElMessageBox.alert(
-      `共 ${payload.total} 天，即将提交到后端。\n\n请确保后端接口 /api/holiday/config 已就绪。`,
-      '提交确认',
-      {
-        confirmButtonText: '我知道了',
-        type: 'info',
-        callback: () => {
-          ElMessage.success('数据已准备就绪，可调用后端 API 提交')
-        }
-      }
-    )
+    const res = await submitHolidayConfig(payload)
+    const data = res.data
+    if (data.code === 200) {
+      ElMessage.success(data.data || `${selectedYear.value}年节假日配置已提交成功`)
+    } else {
+      ElMessage.error(data.message || '提交失败')
+    }
   } catch (err) {
     console.error('Submit error:', err)
-    ElMessage.error(`提交失败: ${err.message || '未知错误'}`)
+    ElMessage.error(`提交失败: ${err.response?.data?.message || err.message || '网络错误'}`)
   } finally {
     submitting.value = false
   }

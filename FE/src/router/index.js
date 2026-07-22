@@ -13,7 +13,6 @@ const routes = [
   {
     path: '/',
     component: () => import('@/views/Layout.vue'),
-    redirect: '/my-record',
     meta: { requiresAuth: true },
     children: [
       {
@@ -26,37 +25,43 @@ const routes = [
         path: 'clock',
         name: 'Clock',
         component: () => import('@/views/attendance/Clock.vue'),
-        meta: { title: '打卡' }
+        meta: { title: '打卡', roles: [0, 1, 2, 3] }
       },
       {
         path: 'my-record',
         name: 'Record',
         component: () => import('@/views/attendance/Record.vue'),
-        meta: { title: '我的记录' }
+        meta: { title: '我的记录', roles: [0, 1, 2, 3] }
       },
       {
         path: 'leave/apply',
         name: 'LeaveApply',
         component: () => import('@/views/leave/Apply.vue'),
-        meta: { title: '请假申请' }
+        meta: { title: '请假申请', roles: [0, 1, 2, 3] }
       },
       {
         path: 'leave/approve',
         name: 'LeaveApprove',
         component: () => import('@/views/leave/Approve.vue'),
-        meta: { title: '审批管理', roles: [1, 2, 3, 4] }
+        meta: { title: '审批管理', roles: [1, 2, 3] }
       },
       {
         path: 'stat',
         name: 'Stat',
         component: () => import('@/views/stat/Index.vue'),
-        meta: { title: '统计报表', roles: [3, 4] }
+        meta: { title: '统计报表', roles: [3] }
       },
       {
         path: 'holiday',
         name: 'HolidayCalendar',
         component: () => import('@/views/holiday/Calendar.vue'),
         meta: { title: '节假日管理', roles: [4] }
+      },
+      {
+        path: 'work-calendar',
+        name: 'WorkCalendarView',
+        component: () => import('@/views/holiday/WorkCalendarView.vue'),
+        meta: { title: '工作日历', roles: [0, 1, 2, 3, 4] }
       },
       {
         path: 'employee',
@@ -112,6 +117,12 @@ router.beforeEach(async (to, from, next) => {
   const role = userStore.user?.role != null
     ? Number(userStore.user.role)
     : getRoleFromToken(token)
+
+  // 根路径按角色分发首页
+  if (to.path === '/') {
+    return next(role === 4 ? '/holiday' : '/my-record')
+  }
+
   if (to.meta.roles && Array.isArray(to.meta.roles) && !to.meta.roles.includes(role)) {
     ElMessage.error('无权访问该页面')
     return next('/')
