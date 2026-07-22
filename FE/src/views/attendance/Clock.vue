@@ -155,4 +155,31 @@ async function handleClock() {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* 小屏适配 */
+@media (max-width: 420px) {
+  .clock-page {
+    padding: 40px 16px;
+  }
+  .time {
+    font-size: 44px;
+    letter-spacing: 2px;
+  }
+  .date {
+    font-size: 14px;
+  }
+  .clock-btn {
+    width: 140px;
+    height: 140px;
+  }
+  .btn-icon {
+    font-size: 28px;
+  }
+  .btn-text {
+    font-size: 14px;
+  }
+  .time-display {
+    margin-bottom: 36px;
+  }
+}
 </style>

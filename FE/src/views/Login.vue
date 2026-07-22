@@ -115,7 +115,8 @@ async function handleLogin() {
 
 <style scoped>
 .login-page {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -174,7 +175,7 @@ async function handleLogin() {
 .login-card {
   position: relative;
   z-index: 1;
-  width: 400px;
+  width: min(400px, 90vw);
   padding: 44px 40px 36px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -263,6 +264,75 @@ async function handleLogin() {
 }
 .login-btn:active {
   transform: translateY(0);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  /* 背景装饰缩小 */
+  .shape-1 {
+    width: 200px;
+    height: 200px;
+    top: -8%;
+    left: -10%;
+  }
+  .shape-2 {
+    width: 180px;
+    height: 180px;
+    bottom: -10%;
+    right: -12%;
+  }
+  .shape-3 {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    width: min(400px, 90vw);
+    padding: 32px 20px 28px;
+  }
+  .card-header {
+    margin-bottom: 24px;
+  }
+  .card-header h1 {
+    font-size: 20px;
+  }
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+  .logo-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  .login-btn {
+    height: 46px;
+    font-size: 16px;
+    letter-spacing: 4px;
+  }
+  .footer-text {
+    font-size: 11px;
+    margin-top: 16px;
+  }
+  /* 表单间距适中 */
+  .login-card :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: 24px 12px 20px;
+  }
+  .card-header h1 {
+    font-size: 18px;
+  }
+  .card-header p {
+    font-size: 13px;
+  }
 }
 
 /* ── 底部文字 ── */

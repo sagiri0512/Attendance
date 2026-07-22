@@ -1,5 +1,6 @@
 package com.sagiri.service.impl;
 
+import com.sagiri.entity.Employee;
 import com.sagiri.entity.LoginUser;
 import com.sagiri.mapper.EmployeeMapper;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new LoginUser(employeeMapper.getEmployeeByEmpNo(username));
+        Employee employee = employeeMapper.getEmployeeByEmpNo(username);
+        if(employee == null){
+            throw new UsernameNotFoundException("账号密码错误！");
+        }
+        return new LoginUser(employee);
     }
 }
