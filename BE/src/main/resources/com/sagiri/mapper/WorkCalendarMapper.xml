@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sagiri.mapper.WorkCalendarMapper">
+
+    <!-- 删除某年所有日历数据（走 uk_date 索引） -->
+    <delete id="deleteByYear">
+        DELETE FROM work_calendar
+        WHERE date BETWEEN CONCAT(#{year}, '-01-01') AND CONCAT(#{year}, '-12-31')
+    </delete>
+
+    <!-- 批量插入：前端 category 映射到 day_type / wage / holiday / after -->
+    <insert id="batchInsert">
+        INSERT INTO work_calendar (
+            date, day_type, holiday, holiday_name, wage, after, target, confirmed, confirmed_by, confirmed_at, source, created_at
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.date},
+                CASE #{item.category}
+                    WHEN 'workday'  THEN 0
+                    WHEN 'weekend'  THEN 1
+                    WHEN 'legal'    THEN 2
+                    WHEN 'adjusted' THEN 3
+                    WHEN 'makeup'   THEN 0
+                    ELSE 0
+                END,
+                CASE #{item.category}
+                    WHEN 'legal'    THEN 1
+                    WHEN 'adjusted' THEN 1
+                    WHEN 'weekend'  THEN 1
+                    ELSE 0
+                END,
+                #{item.name},
+                CASE #{item.category}
+                    WHEN 'legal'    THEN 3
+                    WHEN 'adjusted' THEN 2
+                    ELSE 1
+                END,
+                CASE #{item.category}
+                    WHEN 'makeup' THEN 1
+                    ELSE NULL
+                END,
+                NULL,
+                1,
+                #{item.confirmedBy},
+                NOW(),
+                'manual',
+                NOW()
+            )
+        </foreach>
+    </insert>
+
+    <!-- 按年份查询日历数据（走 uk_date 索引） -->
+    <select id="selectByYear" resultType="com.sagiri.vo.HolidayVo">
+        SELECT id, date, day_type
+        FROM work_calendar
+        WHERE date BETWEEN CONCAT(#{year}, '-01-01') AND CONCAT(#{year}, '-12-31')
+    </select>
+
+</mapper>
