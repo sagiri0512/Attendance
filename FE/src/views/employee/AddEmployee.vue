@@ -116,27 +116,100 @@
       <!-- 社保 / 公积金 -->
       <h3 class="section-title">社保 / 公积金</h3>
       <p class="hint">
-        基数留空或填 0 → 系统自动使用「基本工资」；公积金比例留空 → 系统自动使用 8%
+        基数留空或填 0 → 系统自动使用「基本工资」；比例留空 → 使用南京法定默认比例
       </p>
+
+      <!-- 基数 -->
+      <h4 class="sub-title">缴费基数</h4>
       <el-row :gutter="20">
         <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="社保基数">
-            <el-input-number v-model="form.socialInsuranceBase" :min="0" :precision="2" controls-position="right" style="width:100%" placeholder="留空用基本工资" />
+            <el-input-number v-model="form.socialInsuranceConfig.socialInsuranceBase" :min="0" :precision="2" controls-position="right" style="width:100%" placeholder="留空用基本工资" />
           </el-form-item>
         </el-col>
         <el-col :xs="24" :sm="12" :md="8">
           <el-form-item label="公积金基数">
-            <el-input-number v-model="form.housingFundBase" :min="0" :precision="2" controls-position="right" style="width:100%" placeholder="留空用基本工资" />
+            <el-input-number v-model="form.socialInsuranceConfig.housingFundBase" :min="0" :precision="2" controls-position="right" style="width:100%" placeholder="留空用基本工资" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 养老保险 -->
+      <h4 class="sub-title">养老保险</h4>
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="个人比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.pensionPersonal" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 8%" />
           </el-form-item>
         </el-col>
         <el-col :xs="24" :sm="12" :md="8">
-          <el-form-item label="公积金个人比例(%)">
-            <el-input-number v-model="form.housingFundRatioPersonal" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="留空用 8%" />
+          <el-form-item label="公司比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.pensionCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 16%" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 医疗保险 -->
+      <h4 class="sub-title">医疗保险</h4>
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="个人比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.medicalPersonal" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 2%" />
           </el-form-item>
         </el-col>
         <el-col :xs="24" :sm="12" :md="8">
-          <el-form-item label="公积金公司比例(%)">
-            <el-input-number v-model="form.housingFundRatioCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="留空用 8%" />
+          <el-form-item label="公司比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.medicalCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 8%" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 失业保险 -->
+      <h4 class="sub-title">失业保险</h4>
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="个人比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.unemploymentPersonal" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 0.5%" />
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="公司比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.unemploymentCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 0.5%" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 工伤保险 -->
+      <h4 class="sub-title">工伤保险（仅公司缴纳）</h4>
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="公司比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.injuryCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 0.4%" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 生育保险 -->
+      <h4 class="sub-title">生育保险（仅公司缴纳）</h4>
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="公司比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.maternityCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 0.8%" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 住房公积金 -->
+      <h4 class="sub-title">住房公积金</h4>
+      <el-row :gutter="20">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="个人比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.housingFundPersonal" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 8%" />
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="公司比例(%)">
+            <el-input-number v-model="form.socialInsuranceConfig.housingFundCompany" :min="0" :max="100" :precision="2" controls-position="right" style="width:100%" placeholder="默认 8%" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -173,10 +246,20 @@ const form = reactive({
   carSubsidy: null,
   mealSubsidy: null,
   otherSubsidy: null,
-  socialInsuranceBase: null,
-  housingFundBase: null,
-  housingFundRatioPersonal: null,
-  housingFundRatioCompany: null
+  socialInsuranceConfig: {
+    socialInsuranceBase: null,
+    housingFundBase: null,
+    pensionPersonal: null,
+    pensionCompany: null,
+    medicalPersonal: null,
+    medicalCompany: null,
+    unemploymentPersonal: null,
+    unemploymentCompany: null,
+    injuryCompany: null,
+    maternityCompany: null,
+    housingFundPersonal: null,
+    housingFundCompany: null
+  }
 })
 
 const rules = {
@@ -265,9 +348,21 @@ function handleReset() {
     realName: '', role: null, phone: '',
     pmId: null, plId: null,
     baseSalary: null, positionSalary: null,
-    housingSubsidy: null, carSubsidy: null, mealSubsidy: null, otherSubsidy: null,
-    socialInsuranceBase: null, housingFundBase: null,
-    housingFundRatioPersonal: null, housingFundRatioCompany: null
+    housingSubsidy: null, carSubsidy: null, mealSubsidy: null, otherSubsidy: null
+  })
+  Object.assign(form.socialInsuranceConfig, {
+    socialInsuranceBase: null,
+    housingFundBase: null,
+    pensionPersonal: null,
+    pensionCompany: null,
+    medicalPersonal: null,
+    medicalCompany: null,
+    unemploymentPersonal: null,
+    unemploymentCompany: null,
+    injuryCompany: null,
+    maternityCompany: null,
+    housingFundPersonal: null,
+    housingFundCompany: null
   })
   plList.value = []
 }
@@ -292,6 +387,15 @@ function handleReset() {
   font-weight: 600;
   color: #1e293b;
   border-left: 3px solid #6366f1;
+}
+
+.sub-title {
+  margin: 16px 0 8px;
+  padding-left: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  border-left: 2px solid #94a3b8;
 }
 
 .hint {

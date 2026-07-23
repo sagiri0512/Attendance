@@ -4,4 +4,39 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sagiri.mapper.SocialInsuranceConfigMapper">
 
+    <insert id="insert" parameterType="com.sagiri.entity.SocialInsuranceConfig"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO social_insurance_config (
+            emp_id,
+            social_insurance_base,
+            housing_fund_base,
+            pension_personal,
+            pension_company,
+            medical_personal,
+            medical_company,
+            unemployment_personal,
+            unemployment_company,
+            injury_company,
+            maternity_company,
+            housing_fund_personal,
+            housing_fund_company,
+            remark
+        ) VALUES (
+            #{empId},
+            #{socialInsuranceBase},
+            #{housingFundBase},
+            #{pensionPersonal},
+            #{pensionCompany},
+            #{medicalPersonal},
+            #{medicalCompany},
+            #{unemploymentPersonal},
+            #{unemploymentCompany},
+            #{injuryCompany},
+            #{maternityCompany},
+            #{housingFundPersonal},
+            #{housingFundCompany},
+            #{remark}
+        )
+    </insert>
+
 </mapper>
