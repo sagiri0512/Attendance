@@ -34,15 +34,11 @@
         emp_no, password, real_name, pm_id, pl_id,
         role, phone, base_salary, position_salary,
         housing_subsidy, car_subsidy, meal_subsidy, other_subsidy,
-        social_insurance_base, housing_fund_base,
-        housing_fund_ratio_personal, housing_fund_ratio_company,
         status, created_at, deleted
         ) VALUES (
         #{empNo}, #{password}, #{realName}, #{pmId}, #{plId},
         #{role}, #{phone}, #{baseSalary}, #{positionSalary},
         #{housingSubsidy}, #{carSubsidy}, #{mealSubsidy}, #{otherSubsidy},
-        #{socialInsuranceBase}, #{housingFundBase},
-        #{housingFundRatioPersonal}, #{housingFundRatioCompany},
         1, NOW(), 0
         )
     </insert>
