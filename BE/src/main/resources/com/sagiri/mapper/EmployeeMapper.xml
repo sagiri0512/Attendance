@@ -66,4 +66,8 @@
     <select id="getPLByPMId" resultMap="PLByPMId">
         SELECT id, real_name as pl_name FROM employee WHERE role = 1 AND pm_id = #{pmId}
     </select>
+
+    <select id="getAllEmpId" resultType="long">
+        SELECT id FROM employee
+    </select>
 </mapper>

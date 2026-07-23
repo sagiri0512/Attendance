@@ -1,5 +1,9 @@
 package com.sagiri.constant;
 
+import lombok.Data;
+
+import java.time.LocalTime;
+
 /**
  * 全局业务常量
  * <ul>
@@ -8,6 +12,10 @@ package com.sagiri.constant;
  * </ul>
  */
 public class SalaryConfig {
+    // ========== 上班时间 ==========
+    public static final LocalTime CLOCK_IN_TIME  = LocalTime.of(9, 0);    // 09:00
+    // ========== 下班时间 ==========
+    public static final LocalTime CLOCK_OUT_TIME = LocalTime.of(18, 0);   // 18:00
 
     // ========== 工号生成 ==========
 

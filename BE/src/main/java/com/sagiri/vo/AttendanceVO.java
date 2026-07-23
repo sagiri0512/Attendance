@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 /**
  * 考勤记录视图对象
  *
- * <p>对应 attendance_record LEFT JOIN leave_request 的查询结果。
- * attendance_record字段以a_前缀，leave_request字段以l_前缀，
- * 请假相关字段可能为null（当天无请假时）。
+ * <p>对应 work_calendar LEFT JOIN attendance_record LEFT JOIN leave_request LEFT JOIN overtime_request 的查询结果。
+ * 字段以字母前缀区分来源表：w_→工作历、a_→考勤、l_→请假、o_→加班。
+ * 请假/加班相关字段可能为null（当天无请假/加班时）。
  * 用于前端分页展示我的考勤列表。</p>
  *
  * @author sagiri
@@ -20,6 +20,13 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class AttendanceVO {
+
+    // ========== work_calendar 字段 (w_ 前缀) ==========
+
+    /** 日期 */
+    private LocalDate wDate;
+    /** 日期类型：0-工作日 1-休息日 2-法定假 */
+    private Integer wDayType;
 
     // ========== attendance_record 字段 (a_ 前缀) ==========
 
@@ -52,4 +59,13 @@ public class AttendanceVO {
     private String lReason;
     /** 最终审批结果 */
     private Integer lFinal;
+
+    // ========== overtime_request 字段 (o_ 前缀，LEFT JOIN 可能为null) ==========
+
+    /** 实际加班小时数 */
+    private BigDecimal oHours;
+    /** 加班工资倍数：1/1.5/2/3 */
+    private BigDecimal oWage;
+    /** 加班审批状态：0-审批中 1-已通过 2-已驳回 */
+    private Integer oStatus;
 }

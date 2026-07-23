@@ -2,6 +2,9 @@ package com.sagiri.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.sagiri.constant.SalaryConfig;
+import com.sagiri.entity.AttendanceRecord;
+import com.sagiri.mapper.EmployeeMapper;
 import com.sagiri.vo.AttendancePageVO;
 import com.sagiri.vo.AttendanceVO;
 import com.sagiri.vo.Result;
@@ -11,6 +14,7 @@ import com.sagiri.utils.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -18,8 +22,12 @@ import java.util.List;
 /**
  * 考勤记录服务实现
  *
- * <p>实现上下班打卡和考勤记录分页查询功能。
- * 打卡逻辑：凌晨5点为日期分界线，当天首次请求记上班、再次请求记下班。</p>
+ * <p>核心功能：
+ * <ol>
+ *   <li>上下班打卡 — 凌晨5点分界，当天首次记上班、再次记下班</li>
+ *   <li>分页查询考勤记录 — 关联请假表、加班表、工作日历</li>
+ *   <li>缺勤标记 — 定时任务触发，按迟到/早退/缺卡计算缺勤小时</li>
+ * </ol></p>
  *
  * @author sagiri
  */
@@ -28,13 +36,17 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
     private final AttendanceRecordMapper attendanceRecordMapper;
 
+    private final EmployeeMapper employeeMapper;
+
     /**
-     * 构造器注入考勤Mapper
+     * 构造器注入 Mapper 依赖
      *
-     * @param attendanceRecordMapper 考勤记录Mapper
+     * @param attendanceRecordMapper 考勤记录 Mapper
+     * @param employeeMapper         员工 Mapper（用于获取所有员工 ID）
      */
-    public AttendanceRecordServiceImpl(AttendanceRecordMapper attendanceRecordMapper) {
+    public AttendanceRecordServiceImpl(AttendanceRecordMapper attendanceRecordMapper, EmployeeMapper employeeMapper) {
         this.attendanceRecordMapper = attendanceRecordMapper;
+        this.employeeMapper = employeeMapper;
     }
 
     /**
@@ -106,5 +118,83 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
         PageInfo<AttendanceVO> page = new PageInfo<>(attendanceVOS);
 
         return Result.success(AttendancePageVO.from(page));
+    }
+
+    /**
+     * 标记缺勤（定时任务：每天凌晨 5 点执行）。
+     *
+     * <h3>处理流程</h3>
+     * <ol>
+     *   <li>获取所有员工 ID</li>
+     *   <li>查询每个员工<b>前一天</b>的考勤记录</li>
+     *   <li>根据打卡时间计算缺勤小时：迟到 + 早退</li>
+     *   <li>扣减请假小时数</li>
+     *   <li>最终缺勤 > 0 则更新状态</li>
+     * </ol>
+     *
+     * <h3>计算规则</h3>
+     * <table>
+     *   <tr><th>情况</th><th>缺勤小时</th></tr>
+     *   <tr><td>无打卡记录</td><td>8（插入新记录）</td></tr>
+     *   <tr><td>缺上班/下班打卡</td><td>8</td></tr>
+     *   <tr><td>迟到</td><td>Duration.between(09:00, 上班时间) 按分钟向上取整</td></tr>
+     *   <tr><td>早退</td><td>Duration.between(下班时间, 18:00) 按分钟向上取整</td></tr>
+     *   <tr><td>请假扣减</td><td>absentHours - leaveHours（≥ 0 才更新）</td></tr>
+     * </table>
+     *
+     * <h3>依赖常量</h3>
+     * <ul>
+     *   <li>{@link SalaryConfig#CLOCK_IN_TIME} = 09:00</li>
+     *   <li>{@link SalaryConfig#CLOCK_OUT_TIME} = 18:00</li>
+     * </ul>
+     *
+     * <p>踩过的坑见单元测试：{@code AttendanceRecordServiceImplTest}</p>
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void markAbsent() {
+        List<Long> idList = employeeMapper.getAllEmpId();
+        // 获取要处理的日期
+        LocalDate day = LocalDate.now().minusDays(1);
+        LocalTime start = SalaryConfig.CLOCK_IN_TIME;  // 09:00
+        LocalTime end = SalaryConfig.CLOCK_OUT_TIME;
+        for(Long id : idList){
+            AttendanceRecord attendanceRecord = attendanceRecordMapper.getRecordInfoByDate(id, day);
+            if(attendanceRecord == null){
+                attendanceRecordMapper.insertAbsent(id, day);
+                continue;
+            }
+            //缺勤时长
+            Integer absentHours = 0;
+
+            //打卡缺失
+            if(attendanceRecord.getClockInTime() == null || attendanceRecord.getClockOutTime() == null){
+                absentHours = 8;
+            }else {
+                LocalTime clockIn = attendanceRecord.getClockInTime()
+                        .toLocalDateTime().toLocalTime();
+                LocalTime clockOut = attendanceRecord.getClockOutTime()
+                        .toLocalDateTime().toLocalTime();
+                // 迟到
+                if (clockIn.isAfter(start)) {
+                    long lateMinutes = Duration.between(start, clockIn).toMinutes();
+                    int lateHours = (int) ((lateMinutes + 59) / 60);
+                    absentHours += lateHours;
+                }
+                // 早退（必须有下班打卡才判）
+                if (clockOut.isBefore(end)) {
+                    long earlyMinutes = Duration.between(clockOut, end).toMinutes();
+                    int earlyHours = (int) ((earlyMinutes + 59) / 60);
+                    absentHours += earlyHours;
+                }
+            }
+            if (attendanceRecord.getLeaveHours() != null) {
+                absentHours -= attendanceRecord.getLeaveHours().intValue();
+            }
+            //存在缺勤
+            if(absentHours > 0){
+                attendanceRecordMapper.updateStatusAndAbsentHoursByEidAndDay(absentHours, id, day);
+            }
+        }
     }
 }

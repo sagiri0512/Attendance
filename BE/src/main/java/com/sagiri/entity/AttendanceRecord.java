@@ -3,6 +3,8 @@ package com.sagiri.entity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 /**
  * 考勤记录实体
  *
@@ -29,6 +31,8 @@ public class AttendanceRecord {
     private Long status;
     /** 缺勤小时数 */
     private Double absentHours;
+    /** 请假小时数 */
+    private Double leaveHours;
     /** 关联请假单ID */
     private Long leaveRequestId;
     /** 关联加班单ID */
