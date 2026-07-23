@@ -13,7 +13,15 @@
       >
         <el-table-column label="日期" width="120" fixed>
           <template #default="{ row }">
-            <span class="date-cell">{{ formatDate(row.adate) }}</span>
+            <span class="date-cell">{{ formatDate(row.wDate || row.adate) }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="日期类型" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="dayTypeTag(row.wDayType)" size="small" effect="light" round>
+              {{ dayTypeLabel(row.wDayType) }}
+            </el-tag>
           </template>
         </el-table-column>
 
@@ -66,6 +74,24 @@
               <div class="leave-range" v-if="row.lstart">
                 {{ formatTime(row.lstart) }} ~ {{ formatTime(row.lend) }}
               </div>
+            </div>
+            <span v-else class="null-text">无</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="加班信息" min-width="180">
+          <template #default="{ row }">
+            <div v-if="row.oHours != null" class="overtime-info">
+              <span class="overtime-hours">{{ row.oHours }}h</span>
+              <span class="overtime-wage">¥{{ row.oWage != null ? row.oWage : '--' }}</span>
+              <el-tag
+                :type="overtimeTag(row.oStatus)"
+                size="small"
+                effect="light"
+                round
+              >
+                {{ overtimeLabel(row.oStatus) }}
+              </el-tag>
             </div>
             <span v-else class="null-text">无</span>
           </template>
@@ -168,6 +194,26 @@ function leaveFinalType(f) {
   return map[f] || 'info'
 }
 
+// 日期类型标签
+function dayTypeLabel(t) {
+  const map = { 0: '工作日', 1: '休息日', 2: '节假日' }
+  return map[t] || '--'
+}
+function dayTypeTag(t) {
+  const map = { 0: '', 1: 'warning', 2: 'danger' }
+  return map[t] || 'info'
+}
+
+// 加班信息
+function overtimeLabel(s) {
+  const map = { 0: '审批中', 1: '已通过', 2: '已驳回' }
+  return map[s] || '--'
+}
+function overtimeTag(s) {
+  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
+  return map[s] || 'info'
+}
+
 // 行样式
 function rowClassName({ row }) {
   if (row.astatus === 0) return 'row-normal'
@@ -217,7 +263,7 @@ onMounted(fetchData)
     -webkit-overflow-scrolling: touch;
   }
   .table-wrapper :deep(.el-table) {
-    min-width: 830px;
+    min-width: 1110px;
   }
 }
 
@@ -275,6 +321,27 @@ onMounted(fetchData)
   color: #94a3b8;
   font-size: 12px;
   width: 100%;
+}
+
+/* 加班信息 */
+.overtime-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  line-height: 1.5;
+}
+.overtime-hours {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.overtime-wage {
+  color: #64748b;
+  font-size: 13px;
 }
 
 /* 行状态高亮 */

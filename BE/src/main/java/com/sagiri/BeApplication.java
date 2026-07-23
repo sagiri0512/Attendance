@@ -3,6 +3,7 @@ package com.sagiri;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * HR考勤工资系统 - Spring Boot 启动类
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  * @author sagiri
  */
+@EnableScheduling
 @SpringBootApplication
 @MapperScan("com.sagiri.mapper")
 public class BeApplication {

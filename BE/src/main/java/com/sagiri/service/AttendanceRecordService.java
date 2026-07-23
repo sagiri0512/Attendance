@@ -31,4 +31,20 @@ public interface AttendanceRecordService {
      * @return 分页考勤记录
      */
     Result<?> getMyAttendanceRecords(Long eid, Integer start, Integer size);
+
+    /**
+     * 标记缺勤（定时任务调用）
+     *
+     * <p>每天凌晨5点由 {@code AttendanceScheduler} 触发，
+     * 遍历所有员工前一天考勤记录，标记迟到/早退/缺勤状态：</p>
+     * <ol>
+     *   <li>无打卡记录 → 插入缺勤记录（absentHours = 8）</li>
+     *   <li>缺上班或下班打卡 → absentHours = 8</li>
+     *   <li>迟到：09:00 后上班 → 按分钟向上取整计算缺勤小时</li>
+     *   <li>早退：18:00 前下班 → 按分钟向上取整计算缺勤小时</li>
+     *   <li>扣减请假小时数（leaveHours）</li>
+     *   <li>最终 absentHours &gt; 0 则更新记录状态为缺勤</li>
+     * </ol>
+     */
+    void markAbsent();
 }

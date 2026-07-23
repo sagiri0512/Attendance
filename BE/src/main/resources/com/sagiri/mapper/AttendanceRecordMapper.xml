@@ -10,7 +10,7 @@
         WHERE emp_id = #{empId} AND record_date = #{date}
     </select>
 
-<insert id="insert">
+    <insert id="insert">
         INSERT INTO attendance_record(emp_id, record_date, clock_in_time, clock_out_time, created_at)
         VALUES (#{empId}, CURDATE(), NOW(), NOW(), NOW())
     </insert>
@@ -22,8 +22,14 @@
     </update>
 
     <resultMap id="attendanceVOResult" type="com.sagiri.vo.AttendanceVO">
-        <!-- attendance_record -->
+        <!-- attendance_record (id 必须在所有 result 之前) -->
         <id     column="a_id"           property="aId"          />
+
+        <!-- work_calendar -->
+        <result column="w_date"     property="wDate"     jdbcType="DATE"    />
+        <result column="w_day_type" property="wDayType"  jdbcType="TINYINT" />
+
+        <!-- attendance_record -->
         <result column="a_date"         property="aDate"        jdbcType="DATE"       />
         <result column="a_clock_in"     property="aClockIn"     jdbcType="TIMESTAMP"  />
         <result column="a_clock_out"    property="aClockOut"    jdbcType="TIMESTAMP"  />
@@ -38,30 +44,66 @@
         <result column="l_days"   property="lDays"   jdbcType="DECIMAL"    />
         <result column="l_reason" property="lReason" jdbcType="VARCHAR"    />
         <result column="l_final"  property="lFinal"  jdbcType="TINYINT"    />
+
+        <!-- overtime_request (LEFT JOIN, 可能为null) -->
+        <result column="o_hours"  property="oHours"  jdbcType="DECIMAL"  />
+        <result column="o_wage"   property="oWage"   jdbcType="DECIMAL"  />
+        <result column="o_status" property="oStatus" jdbcType="TINYINT"  />
     </resultMap>
 
     <select id="selectAttendanceWithLeave" resultMap="attendanceVOResult">
         SELECT
-        a.id            AS a_id,
-        a.record_date   AS a_date,
-        a.clock_in_time AS a_clock_in,
+        w.date           AS w_date,
+        w.day_type       AS w_day_type,
+
+        a.id             AS a_id,
+        a.record_date    AS a_date,
+        a.clock_in_time  AS a_clock_in,
         a.clock_out_time AS a_clock_out,
-        a.status        AS a_status,
-        a.absent_hours  AS a_absent_hours,
+        a.status         AS a_status,
+        a.absent_hours   AS a_absent_hours,
         a.leave_request_id AS a_leave_id,
 
-        l.leave_type    AS l_type,
-        l.start_time    AS l_start,
-        l.end_time      AS l_end,
-        l.days          AS l_days,
-        l.reason        AS l_reason,
-        l.final_status  AS l_final
-        FROM attendance_record a
+        l.leave_type     AS l_type,
+        l.start_time     AS l_start,
+        l.end_time       AS l_end,
+        l.days           AS l_days,
+        l.reason         AS l_reason,
+        l.final_status   AS l_final,
+
+        o.actual_hours   AS o_hours,
+        o.wage           AS o_wage,
+        o.final_status   AS o_status
+        FROM work_calendar w
+        LEFT JOIN attendance_record a
+        ON w.date = a.record_date
+        AND a.emp_id = #{eid}
         LEFT JOIN leave_request l
         ON a.leave_request_id = l.id
         AND l.final_status IN (0, 1)
-        WHERE a.emp_id = #{eid}
-        ORDER BY a.record_date DESC
+        LEFT JOIN overtime_request o
+        ON w.date = o.overtime_date
+        AND o.emp_id = #{eid}
+        AND o.final_status = 1
+        WHERE w.date >= (SELECT DATE(created_at) FROM employee WHERE id = #{eid})
+        AND w.date &lt;= CURDATE()
+        ORDER BY w.date DESC
     </select>
+
+    <insert id="insertAbsent">
+        INSERT INTO attendance_record(emp_id, record_date, status, absent_hours, created_at)
+        VALUES (#{empId}, #{recordDate}, 1, 8, NOW())
+    </insert>
+
+    <select id="getRecordInfoByDate" resultType="com.sagiri.entity.AttendanceRecord">
+        SELECT * FROM attendance_record
+        WHERE emp_id = #{empId} AND record_date = #{date}
+    </select>
+
+    <update id="updateStatusAndAbsentHoursByEidAndDay">
+        UPDATE attendance_record
+        SET status = 1, absent_hours = #{absentHours}
+        WHERE emp_id = #{empId} AND record_date = #{recordDate}
+    </update>
 
 </mapper>

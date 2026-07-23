@@ -64,4 +64,6 @@ public interface EmployeeMapper {
      * @return PL列表（id + 姓名）
      */
     List<PL> getPLByPMId(@Param("pmId") Long pmId);
+
+    List<Long> getAllEmpId();
 }

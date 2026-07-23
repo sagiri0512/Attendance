@@ -1,5 +1,6 @@
 package com.sagiri.mapper;
 
+import com.sagiri.entity.AttendanceRecord;
 import com.sagiri.vo.AttendanceVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -49,4 +50,10 @@ public interface AttendanceRecordMapper {
      * @return 考勤+请假关联数据列表
      */
     List<AttendanceVO> selectAttendanceWithLeave(@Param("eid") Long eid);
+
+    Integer insertAbsent(@Param("empId") Long empId, @Param("recordDate") LocalDate recordDate);
+
+    AttendanceRecord getRecordInfoByDate(@Param("empId") Long empId, @Param("date") LocalDate date);
+
+    Integer updateStatusAndAbsentHoursByEidAndDay(@Param("absentHours") Integer absentHours, @Param("empId") Long empId, @Param("recordDate") LocalDate date);
 }
