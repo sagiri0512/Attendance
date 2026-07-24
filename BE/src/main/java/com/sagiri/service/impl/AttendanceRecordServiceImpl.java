@@ -4,18 +4,21 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sagiri.constant.SalaryConfig;
 import com.sagiri.entity.AttendanceRecord;
+import com.sagiri.mapper.AttendanceRecordMapper;
 import com.sagiri.mapper.EmployeeMapper;
+import com.sagiri.mapper.WorkCalendarMapper;
+import com.sagiri.service.AttendanceRecordService;
+import com.sagiri.utils.JwtUtil;
 import com.sagiri.vo.AttendancePageVO;
 import com.sagiri.vo.AttendanceVO;
 import com.sagiri.vo.Result;
-import com.sagiri.mapper.AttendanceRecordMapper;
-import com.sagiri.service.AttendanceRecordService;
-import com.sagiri.utils.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -38,15 +41,21 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
     private final EmployeeMapper employeeMapper;
 
+    private final WorkCalendarMapper workCalendarMapper;
+
     /**
      * 构造器注入 Mapper 依赖
      *
      * @param attendanceRecordMapper 考勤记录 Mapper
      * @param employeeMapper         员工 Mapper（用于获取所有员工 ID）
+     * @param workCalendarMapper     工作日历 Mapper（用于判断是否工作日）
      */
-    public AttendanceRecordServiceImpl(AttendanceRecordMapper attendanceRecordMapper, EmployeeMapper employeeMapper) {
+    public AttendanceRecordServiceImpl(AttendanceRecordMapper attendanceRecordMapper,
+                                       EmployeeMapper employeeMapper,
+                                       WorkCalendarMapper workCalendarMapper) {
         this.attendanceRecordMapper = attendanceRecordMapper;
         this.employeeMapper = employeeMapper;
+        this.workCalendarMapper = workCalendarMapper;
     }
 
     /**
@@ -153,9 +162,13 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void markAbsent() {
-        List<Long> idList = employeeMapper.getAllEmpId();
         // 获取要处理的日期
         LocalDate day = LocalDate.now().minusDays(1);
+        // 非工作日(周末/节假日/调休)跳过缺勤标记
+        if (!isWorkday(day)) {
+            return;
+        }
+        List<Long> idList = employeeMapper.getAllEmpId();
         LocalTime start = SalaryConfig.CLOCK_IN_TIME;  // 09:00
         LocalTime end = SalaryConfig.CLOCK_OUT_TIME;
         for(Long id : idList){
@@ -173,17 +186,19 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
             }else {
                 LocalTime clockIn = attendanceRecord.getClockInTime()
                         .toLocalDateTime().toLocalTime();
-                LocalTime clockOut = attendanceRecord.getClockOutTime()
-                        .toLocalDateTime().toLocalTime();
-                // 迟到
+                LocalDateTime clockOutLdt = attendanceRecord.getClockOutTime().toLocalDateTime();
+                LocalTime clockOut = clockOutLdt.toLocalTime();
+                // 迟到（缺勤区间 [start, clockIn)，扣除午休 12:00~13:00）
                 if (clockIn.isAfter(start)) {
-                    long lateMinutes = Duration.between(start, clockIn).toMinutes();
+                    long lateMinutes = workMinutesBetween(start, clockIn);
                     int lateHours = (int) ((lateMinutes + 59) / 60);
                     absentHours += lateHours;
                 }
-                // 早退（必须有下班打卡才判）
-                if (clockOut.isBefore(end)) {
-                    long earlyMinutes = Duration.between(clockOut, end).toMinutes();
+                // 早退（必须有下班打卡才判，缺勤区间 [clockOut, end)，扣除午休 12:00~13:00）
+                // 下班打卡是次日(加班到凌晨)则不判早退
+                boolean isClockOutNextDay = clockOutLdt.toLocalDate().isAfter(day);
+                if (!isClockOutNextDay && clockOut.isBefore(end)) {
+                    long earlyMinutes = workMinutesBetween(clockOut, end);
                     int earlyHours = (int) ((earlyMinutes + 59) / 60);
                     absentHours += earlyHours;
                 }
@@ -196,5 +211,47 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
                 attendanceRecordMapper.updateStatusAndAbsentHoursByEidAndDay(absentHours, id, day);
             }
         }
+    }
+
+    /**
+     * 判断指定日期是否为工作日
+     *
+     * <p>优先查 work_calendar 表的 day_type：0=工作日，1/2/3=休息日/节假日/调休。
+     * 若日历表未配置该日期，按周一~周五为工作日兜底。</p>
+     *
+     * @param date 日期
+     * @return true=工作日（需标记缺勤），false=非工作日（跳过）
+     */
+    private boolean isWorkday(LocalDate date) {
+        Integer dayType = workCalendarMapper.getDayTypeByDate(date);
+        if (dayType != null) {
+            return dayType == 0;
+        }
+        // 日历未配置：周一~周五当工作日兜底
+        DayOfWeek dow = date.getDayOfWeek();
+        return dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY;
+    }
+
+    /**
+     * 计算时间区间内的工作分钟数（扣除午休 12:00~13:00）
+     *
+     * <p>用于迟到/早退缺勤时长计算，避免把午休时段算进缺勤。
+     * 例如 09:00 迟到到 14:30，区间 5.5 小时，扣除午休 1 小时 = 4.5 小时工作缺勤。</p>
+     *
+     * @param from 区间起点（含）
+     * @param to   区间终点（不含）
+     * @return 工作分钟数（已扣除午休）
+     */
+    private long workMinutesBetween(LocalTime from, LocalTime to) {
+        long total = Duration.between(from, to).toMinutes();
+        LocalTime lunchStart = SalaryConfig.LUNCH_START;
+        LocalTime lunchEnd = SalaryConfig.LUNCH_END;
+        // 缺勤区间 [from, to) 与午休 [lunchStart, lunchEnd) 的重叠部分
+        LocalTime overlapStart = from.isAfter(lunchStart) ? from : lunchStart;  // max
+        LocalTime overlapEnd   = to.isBefore(lunchEnd)     ? to   : lunchEnd;    // min
+        long overlap = overlapStart.isBefore(overlapEnd)
+                ? Duration.between(overlapStart, overlapEnd).toMinutes()
+                : 0L;
+        return total - overlap;
     }
 }

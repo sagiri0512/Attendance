@@ -16,6 +16,9 @@ public class SalaryConfig {
     public static final LocalTime CLOCK_IN_TIME  = LocalTime.of(9, 0);    // 09:00
     // ========== 下班时间 ==========
     public static final LocalTime CLOCK_OUT_TIME = LocalTime.of(18, 0);   // 18:00
+    // ========== 午休时间（不计入缺勤） ==========
+    public static final LocalTime LUNCH_START    = LocalTime.of(12, 0);   // 12:00
+    public static final LocalTime LUNCH_END      = LocalTime.of(13, 0);   // 13:00
 
     // ========== 工号生成 ==========
 
