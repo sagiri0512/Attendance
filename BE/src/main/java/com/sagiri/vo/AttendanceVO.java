@@ -25,8 +25,10 @@ public class AttendanceVO {
 
     /** 日期 */
     private LocalDate wDate;
-    /** 日期类型：0-工作日 1-休息日 2-法定假 */
+    /** 日期类型：0-工作日 1-休息日 2-法定假 3-调休 */
     private Integer wDayType;
+    /** 节假日名称（如"国庆节"，工作日/普通周末为null） */
+    private String wHolidayName;
 
     // ========== attendance_record 字段 (a_ 前缀) ==========
 

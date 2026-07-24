@@ -26,8 +26,9 @@
         <id     column="a_id"           property="aId"          />
 
         <!-- work_calendar -->
-        <result column="w_date"     property="wDate"     jdbcType="DATE"    />
-        <result column="w_day_type" property="wDayType"  jdbcType="TINYINT" />
+        <result column="w_date"        property="wDate"        jdbcType="DATE"    />
+        <result column="w_day_type"    property="wDayType"     jdbcType="TINYINT" />
+        <result column="w_holiday_name" property="wHolidayName" jdbcType="VARCHAR" />
 
         <!-- attendance_record -->
         <result column="a_date"         property="aDate"        jdbcType="DATE"       />
@@ -55,6 +56,7 @@
         SELECT
         w.date           AS w_date,
         w.day_type       AS w_day_type,
+        w.holiday_name   AS w_holiday_name,
 
         a.id             AS a_id,
         a.record_date    AS a_date,

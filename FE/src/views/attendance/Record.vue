@@ -11,17 +11,21 @@
         :header-cell-style="{ background: '#1a1a2e', color: '#e2e8f0', fontWeight: 600 }"
         :row-class-name="rowClassName"
       >
-        <el-table-column label="日期" width="120" fixed>
+        <el-table-column label="日期" width="170" fixed>
           <template #default="{ row }">
-            <span class="date-cell">{{ formatDate(row.wDate || row.adate) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="日期类型" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="dayTypeTag(row.wDayType)" size="small" effect="light" round>
-              {{ dayTypeLabel(row.wDayType) }}
-            </el-tag>
+            <div class="date-cell">
+              <span class="date-main">{{ formatDate(row.wDate || row.adate) }}</span>
+              <el-tag
+                v-if="row.wDayType && row.wDayType !== 0"
+                :type="dayTypeTag(row.wDayType)"
+                size="small"
+                effect="light"
+                round
+                class="date-type-tag"
+              >
+                {{ dateExtraLabel(row) }}
+              </el-tag>
+            </div>
           </template>
         </el-table-column>
 
@@ -125,14 +129,21 @@ const pageNum = ref(1)
 const pageSize = ref(10)
 const loading = ref(false)
 
-// 格式化日期 2026-07-20 → 7/20
+// 格式化日期 2026-07-20 → 2026年7月20日 周六
 function formatDate(str) {
   if (!str) return '--'
   const d = new Date(str)
+  const y = d.getFullYear()
   const m = d.getMonth() + 1
   const day = d.getDate()
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-  return `${m}/${day} 周${weekdays[d.getDay()]}`
+  return `${y}年${m}月${day}日 周${weekdays[d.getDay()]}`
+}
+
+// 日期列附加标签：优先显示节假日名称（如"国庆节"），否则显示类型名称
+function dateExtraLabel(row) {
+  if (row.wHolidayName) return row.wHolidayName
+  return dayTypeLabel(row.wDayType)
 }
 
 // 格式化时间 2026-07-20T08:55:00 → 08:55
@@ -196,11 +207,11 @@ function leaveFinalType(f) {
 
 // 日期类型标签
 function dayTypeLabel(t) {
-  const map = { 0: '工作日', 1: '休息日', 2: '节假日' }
+  const map = { 0: '工作日', 1: '休息日', 2: '节假日', 3: '调休' }
   return map[t] || '--'
 }
 function dayTypeTag(t) {
-  const map = { 0: '', 1: 'warning', 2: 'danger' }
+  const map = { 0: '', 1: 'warning', 2: 'danger', 3: 'warning' }
   return map[t] || 'info'
 }
 
@@ -263,14 +274,23 @@ onMounted(fetchData)
     -webkit-overflow-scrolling: touch;
   }
   .table-wrapper :deep(.el-table) {
-    min-width: 1110px;
+    min-width: 1060px;
   }
 }
 
 /* 日期列 */
 .date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.date-main {
   font-weight: 600;
   color: #1a1a2e;
+  white-space: nowrap;
+}
+.date-type-tag {
+  align-self: flex-start;
 }
 
 /* 空值文本 */

@@ -60,4 +60,11 @@
         WHERE date BETWEEN CONCAT(#{year}, '-01-01') AND CONCAT(#{year}, '-12-31')
     </select>
 
+    <!-- 按日期查询日期类型（0-工作日 1-休息日 2-节假日 3-调休） -->
+    <select id="getDayTypeByDate" resultType="java.lang.Integer">
+        SELECT day_type
+        FROM work_calendar
+        WHERE date = #{date}
+    </select>
+
 </mapper>
