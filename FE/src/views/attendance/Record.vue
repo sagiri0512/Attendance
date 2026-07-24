@@ -14,7 +14,7 @@
         <el-table-column label="日期" width="170" fixed>
           <template #default="{ row }">
             <div class="date-cell">
-              <span class="date-main">{{ formatDate(row.wDate || row.adate) }}</span>
+              <span class="date-main">{{ formatDate(row.wDate || row.aDate) }}</span>
               <el-tag
                 v-if="row.wDayType && row.wDayType !== 0"
                 :type="dayTypeTag(row.wDayType)"
@@ -31,14 +31,14 @@
 
         <el-table-column label="上班打卡" width="140">
           <template #default="{ row }">
-            <span v-if="row.aclockIn">{{ formatTime(row.aclockIn) }}</span>
+            <span v-if="row.aClockIn">{{ formatTime(row.aClockIn) }}</span>
             <span v-else class="null-text">--</span>
           </template>
         </el-table-column>
 
         <el-table-column label="下班打卡" width="140">
           <template #default="{ row }">
-            <span v-if="row.aclockOut">{{ formatTime(row.aclockOut, row.adate) }}</span>
+            <span v-if="row.aClockOut">{{ formatTime(row.aClockOut, row.aDate) }}</span>
             <span v-else class="null-text">--</span>
           </template>
         </el-table-column>
@@ -53,30 +53,30 @@
 
         <el-table-column label="缺勤(h)" width="90" align="center">
           <template #default="{ row }">
-            <span v-if="row.aabsentHours > 0" class="absent-hours">{{ row.aabsentHours }}</span>
+            <span v-if="row.aAbsentHours > 0" class="absent-hours">{{ row.aAbsentHours }}</span>
             <span v-else class="zero-text">0</span>
           </template>
         </el-table-column>
 
         <el-table-column label="请假信息" min-width="200">
           <template #default="{ row }">
-            <div v-if="row.aleaveId" class="leave-info">
-              <span class="leave-type">{{ leaveTypeLabel(row.ltype) }}</span>
-              <span class="leave-days">{{ row.ldays }}天</span>
+            <div v-if="row.aLeaveId" class="leave-info">
+              <span class="leave-type">{{ leaveTypeLabel(row.lType) }}</span>
+              <span class="leave-days">{{ row.lDays }}天</span>
               <el-tag
-                :type="leaveFinalType(row.lfinal)"
+                :type="leaveFinalType(row.lFinal)"
                 size="small"
                 effect="light"
                 round
                 class="leave-status-tag"
               >
-                {{ leaveStatusLabel(row.lfinal) }}
+                {{ leaveStatusLabel(row.lFinal) }}
               </el-tag>
-              <div class="leave-detail" v-if="row.lreason">
-                <span class="reason-text">{{ row.lreason }}</span>
+              <div class="leave-detail" v-if="row.lReason">
+                <span class="reason-text">{{ row.lReason }}</span>
               </div>
-              <div class="leave-range" v-if="row.lstart">
-                {{ formatTime(row.lstart) }} ~ {{ formatTime(row.lend) }}
+              <div class="leave-range" v-if="row.lStart">
+                {{ formatTime(row.lStart) }} ~ {{ formatTime(row.lEnd) }}
               </div>
             </div>
             <span v-else class="null-text">无</span>
@@ -166,10 +166,10 @@ function formatTime(str, recordDate) {
 
 // 状态显示文字
 function displayStatus(row) {
-  const s = row.astatus
+  const s = row.aStatus
   if (s === 0) return '正常'
   if (s === 1) {
-    if (row.aleaveId && row.lfinal === 0) return '缺勤(审批中)'
+    if (row.aLeaveId && row.lFinal === 0) return '缺勤(审批中)'
     return '缺勤'
   }
   if (s === 2) return '请假'
@@ -179,7 +179,7 @@ function displayStatus(row) {
 
 // 状态 tag 类型
 function statusType(row) {
-  const s = row.astatus
+  const s = row.aStatus
   if (s === 0) return 'success'
   if (s === 1) return 'danger'
   if (s === 2) return 'warning'
@@ -227,10 +227,37 @@ function overtimeTag(s) {
 
 // 行样式
 function rowClassName({ row }) {
-  if (row.astatus === 0) return 'row-normal'
-  if (row.astatus === 1) return 'row-absent'
-  if (row.astatus === 2) return 'row-leave'
+  if (row.aStatus === 0) return 'row-normal'
+  if (row.aStatus === 1) return 'row-absent'
+  if (row.aStatus === 2) return 'row-leave'
   return ''
+}
+
+// 兼容 Jackson 对单字母前缀字段(wDate/aDate 等)的序列化差异
+// 统一映射成驼峰写法，后续代码只用规范名
+function normalizeRow(r) {
+  return {
+    ...r,
+    wDate:         r.wDate         ?? r.WDate         ?? r.wdate,
+    wDayType:      r.wDayType      ?? r.WDayType      ?? r.wdayType      ?? r.wDaytype,
+    wHolidayName:  r.wHolidayName  ?? r.WHolidayName  ?? r.wholidayName,
+    aId:           r.aId           ?? r.AId           ?? r.aid,
+    aDate:         r.aDate         ?? r.ADate         ?? r.adate,
+    aClockIn:      r.aClockIn      ?? r.AClockIn      ?? r.aclockIn,
+    aClockOut:     r.aClockOut     ?? r.AClockOut     ?? r.aclockOut,
+    aStatus:       r.aStatus       ?? r.AStatus       ?? r.astatus,
+    aAbsentHours:  r.aAbsentHours  ?? r.AAbsentHours  ?? r.aabsentHours,
+    aLeaveId:      r.aLeaveId      ?? r.ALeaveId      ?? r.aleaveId,
+    lType:         r.lType         ?? r.LType         ?? r.ltype,
+    lStart:        r.lStart        ?? r.LStart        ?? r.lstart,
+    lEnd:          r.lEnd          ?? r.LEnd          ?? r.lend,
+    lDays:         r.lDays         ?? r.LDays         ?? r.ldays,
+    lReason:       r.lReason       ?? r.LReason       ?? r.lreason,
+    lFinal:        r.lFinal        ?? r.LFinal        ?? r.lfinal,
+    oHours:        r.oHours        ?? r.OHours        ?? r.ohours,
+    oWage:         r.oWage         ?? r.OWage         ?? r.owage,
+    oStatus:       r.oStatus       ?? r.OStatus       ?? r.ostatus,
+  }
 }
 
 async function fetchData() {
@@ -242,7 +269,7 @@ async function fetchData() {
     const res = await getMyRecords(start, size)
     const data = res.data?.data
     if (data) {
-      records.value = data.records || []
+      records.value = (data.records || []).map(normalizeRow)
       total.value = data.total || 0
     }
   } catch {
